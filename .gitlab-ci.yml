@@ -1,0 +1,33 @@
+image: node:18
+
+stages:
+  - build
+  - pages
+
+variables:
+  # Par défaut, Vite génère le dossier “dist”
+  DIST_DIR: "dist"
+
+cache:
+  paths:
+    - node_modules/
+
+build_job:
+  stage: build
+  script:
+    - npm ci                # installe exactement ce qui est dans package-lock.json
+    - npm run build         # génère les fichiers statiques dans “dist/”
+  artifacts:
+    paths:
+      - $DIST_DIR
+    expire_in: 1 week
+
+pages:
+  stage: pages
+  script:
+    - mv $DIST_DIR public   # déplace “dist/” en “public/” pour GitLab Pages
+  artifacts:
+    paths:
+      - public
+  only:
+    - giovanni                   # on ne déploie que depuis la branche main
